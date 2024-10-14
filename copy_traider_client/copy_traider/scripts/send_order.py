@@ -1,11 +1,12 @@
 import pdb
+import time
+
 import MetaTrader5 as mt5
 from copy_traider.scripts.utils import *
-import time
 
 
 def run():
-    while (True):
+    while True:
         pdb.set_trace()
         # time.sleep(1)
         mt5.initialize()
@@ -28,8 +29,9 @@ def run():
         active_positions, active_positions_ticket = get_active_positions()
         db_active_positions, db_positions_tickets = get_data_base_positions()
         new_position(active_positions, db_positions_tickets)
-        update_position(active_positions, db_active_positions,
-                        db_positions_tickets)
+        update_position(
+            active_positions, db_active_positions, db_positions_tickets
+        )
 
         # # close closed positions
         # pdb.set_trace()

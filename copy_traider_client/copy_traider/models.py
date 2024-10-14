@@ -1,4 +1,5 @@
 from statistics import mode
+
 from django.db import models
 from django.urls import reverse
 
@@ -14,7 +15,8 @@ class Symbols(models.Model):
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     amount = models.DecimalField(max_digits=20, decimal_places=10, default=0)
     last_price = models.DecimalField(
-        max_digits=20, decimal_places=10, default=0)
+        max_digits=20, decimal_places=10, default=0
+    )
     last_price_update = models.DateTimeField(null=True, blank=True)
     broker = models.CharField(max_length=30)
     monitor = models.BooleanField(default=False)
@@ -23,6 +25,7 @@ class Symbols(models.Model):
 
     def __str__(self):
         return self.name
+
     # class Meta:
     #     ordering = ('-created',)
 
@@ -38,8 +41,7 @@ class Symbols(models.Model):
 
 class OpenOrders(models.Model):
     symbol = models.ForeignKey(
-        Symbols,
-        on_delete=models.CASCADE, related_name="OpenOrder"
+        Symbols, on_delete=models.CASCADE, related_name="OpenOrder"
     )
     ticket = models.IntegerField(null=True, blank=True)
     price = models.FloatField(null=True, blank=True)
@@ -53,8 +55,7 @@ class OpenOrders(models.Model):
 
 class OpenPositions(models.Model):
     symbol = models.ForeignKey(
-        Symbols,
-        on_delete=models.CASCADE, related_name="Openposition"
+        Symbols, on_delete=models.CASCADE, related_name="Openposition"
     )
     ticket = models.IntegerField(null=True, blank=True)
     side = models.CharField(max_length=100, blank=True, null=True)

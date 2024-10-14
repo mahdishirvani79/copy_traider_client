@@ -1,8 +1,10 @@
-import MetaTrader5 as mt5
-from copy_traider.models import Symbols, OpenOrders, OpenPositions
-import requests
 import pdb
 import time
+
+import requests
+
+import MetaTrader5 as mt5
+from copy_traider.models import OpenOrders, OpenPositions, Symbols
 
 # BASE_URL = "http://185.190.39.107/"
 BASE_URL = "http://127.0.0.1:8000/"
@@ -83,7 +85,7 @@ def new_pending_orders(active_orders, db_orders_ticket):
                 "tp": order["tp"],
                 "sl": order["sl"],
                 "ticket": order["ticket"],
-                "volume": volume
+                "volume": volume,
             }
             print("pending order sent...")
             # pdb.set_trace()
@@ -91,9 +93,14 @@ def new_pending_orders(active_orders, db_orders_ticket):
             login()
             if _order.status_code == 200:
                 symbol = Symbols.objects.get(name=order["symbol"])
-                model = OpenOrders.objects.create(symbol=symbol, price=order["price_open"], tp=order["tp"],
-                                                  sl=order["sl"], ticket=order["ticket"],
-                                                  volume=order["volume_current"])
+                model = OpenOrders.objects.create(
+                    symbol=symbol,
+                    price=order["price_open"],
+                    tp=order["tp"],
+                    sl=order["sl"],
+                    ticket=order["ticket"],
+                    volume=order["volume_current"],
+                )
                 model.save()
                 print("order executed")
             elif _order.status_code == 500:
@@ -128,9 +135,16 @@ def new_position(active_positions, db_positions_ticket):
             login()
             if _order.status_code == 200:
                 symbol = Symbols.objects.get(name=position["symbol"])
-                model = OpenPositions.objects.create(symbol=symbol, open_price=position["price_open"], tp=position["tp"],
-                                                     sl=position["sl"], ticket=position["ticket"],
-                                                     volume=position["volume"], side=type, active=True)
+                model = OpenPositions.objects.create(
+                    symbol=symbol,
+                    open_price=position["price_open"],
+                    tp=position["tp"],
+                    sl=position["sl"],
+                    ticket=position["ticket"],
+                    volume=position["volume"],
+                    side=type,
+                    active=True,
+                )
                 model.save()
                 print("position executed")
             elif _order.status_code == 500:
@@ -147,13 +161,17 @@ def update_pending_order(active_orders, db_orders, db_orders_ticket):
             old_sl = this_db_order.sl
             old_tp = this_db_order.tp
             old_price = this_db_order.price
-            if order["sl"] != old_sl or order["tp"] != old_tp or order["price_open"] != old_price:
+            if (
+                order["sl"] != old_sl
+                or order["tp"] != old_tp
+                or order["price_open"] != old_price
+            ):
                 # pdb.set_trace()
                 data = {
                     "ticket": order["ticket"],
                     "tp": order["tp"],
                     "sl": order["sl"],
-                    "price": order["price_open"]
+                    "price": order["price_open"],
                 }
                 print("update pending sent")
                 _order = requests.post(updata_pending_order_url, data)
@@ -170,12 +188,15 @@ def update_pending_order(active_orders, db_orders, db_orders_ticket):
                     print("problem: ", _order.text)
 
 
-def update_position(active_positions, db_active_positions, db_positions_tickets):
+def update_position(
+    active_positions, db_active_positions, db_positions_tickets
+):
     for position in active_positions:
         if position["ticket"] in db_positions_tickets:
             # print(position)
             this_db_position = db_active_positions.get(
-                ticket=position["ticket"])
+                ticket=position["ticket"]
+            )
             old_sl = this_db_position.sl
             old_tp = this_db_position.tp
             if position["sl"] != old_sl or position["tp"] != old_tp:
@@ -184,7 +205,7 @@ def update_position(active_positions, db_active_positions, db_positions_tickets)
                     "ticket": position["ticket"],
                     "tp": position["tp"],
                     "sl": position["sl"],
-                    "symbol": position["symbol"]
+                    "symbol": position["symbol"],
                 }
                 print("update sltp sent")
                 _order = requests.post(update_position_sltp_url, data)
@@ -210,7 +231,7 @@ def update_position(active_positions, db_active_positions, db_positions_tickets)
                     "ticket": position["ticket"],
                     "volume_fraction": volume_fraction,
                     "type": position["type"],
-                    "symbol": position["symbol"]
+                    "symbol": position["symbol"],
                 }
                 print("update volume sent")
                 _order = requests.post(close_position_volume_url, data)
@@ -233,7 +254,7 @@ def close_position(db_positions, active_position_tickets):
                 "ticket": position.ticket,
                 "volume_fraction": 1,
                 "type": position.side,
-                "symbol": position.symbol.name
+                "symbol": position.symbol.name,
             }
             print("position close sent")
             _order = requests.post(close_position_url, data)
